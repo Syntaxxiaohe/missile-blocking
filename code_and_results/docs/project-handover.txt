@@ -1,0 +1,306 @@
+# UAV 蜂群防御实验 — 项目交接文档
+
+> **文档版本**: 2026-03-10（云端作战中）
+> **接手须知**: 本文档是本项目唯一的「工作记忆」，接手的新 AI 读完本文后应能在 5 分钟内完全进入状态，无需阅读其他任何背景文档。请严格遵循文档中的既定物理参数和架构规范。
+
+---
+
+## 一、项目终极目标
+
+本项目的核心任务是：**为 SCI Q1 期刊论文（目标期刊：*Mathematics*, MDPI）提供完整的仿真实验数据支撑**。
+
+**研究问题**：设计无人机（UAV）蜂群协同烟幕干扰策略，使其在面对来袭导弹的多方向饱和攻击时，能以最少的弹药消耗实现最高的拦截成功率。
+
+**三套对比方法**：
+
+| 方法 | 目录 | 核心思想 | 在论文中的定位 |
+|---|---|---|---|
+| **M1_NaiveGA** | `M1_NaiveGA/` | 轮询均匀分配（Naive Baseline） | 负对照，用于证明无智能时空感知分配的局限性 |
+| **M2_Clustering** | `M2_Clustering/` | 时空先验聚类 + 匈牙利匹配 + 专家先验 GA | 正对照，基于启发式规则的智能分配实现 |
+| **M3_AmmoPenalty** | `M3_AmmoPenalty/` | **基于最优传输(OT)的全局自适应分配**（见第五章） | **论文核心创新点与压轴贡献** |
+
+**评估场景**：4 种饱和攻击模式 × 每种 10 次随机采样评估，共计 40 次独立实验/方法。
+
+---
+
+## 二、代码架构全景图
+
+### 2.1 目录结构
+
+```text
+终极实验/
+├── data/
+│   └── missile_pools/         # 4种攻击模式各100枚候选导弹的池（已静态生成，确保对比公平）
+│       ├── mode_1_single_sector_pool.json
+│       ├── mode_2_orthogonal_pincer_pool.json
+│       ├── mode_3_asymmetric_saturation_pool.json
+│       └── mode_4_full_360_swarm_pool.json
+├── shared/                    # 三套方法共享的底层模块（物理引擎已绝对冻结，严禁修改！）
+│   ├── config/params.py       # 所有物理常数（唯一真相来源）
+│   ├── physics/
+│   │   ├── missile_png.py     # PNG导引律 + RK4积分器
+│   │   ├── smoke.py           # 高斯烟团扩散 + 风漂移模型
+│   │   ├── blocking.py        # Beer-Lambert透射率判定（高度向量化）
+│   │   └── uav.py             # UAV运动学约束
+│   ├── simulation/single.py   # 核心仿真评估函数（multi_missile_objective）
+│   ├── data/
+│   │   ├── attack_patterns.py         # 4种攻击模式的数学定义
+│   │   └── missile_pool_generator.py  # 导弹池生成与随机采样器
+│   └── optimizer/
+│       ├── allocator.py       # SpatioTemporalAllocator（M2/M3共用的基础分配器逻辑）
+│       └── hybrid_ga_v3.py    # HybridGeneticAlgorithmV3（Phase 2 全局微调优化器）
+├── M1_NaiveGA/
+│   ├── main.py                # 实验入口：--mode multi_eval 触发并行评估
+│   └── optimizer/
+│       ├── distributed_optimizer.py # TwoStageOptimizer (串行子任务+拼接)
+│       ├── naive_allocator.py       # 轮询分配器实现
+│       └── pseudo_cluster.py        # 伪聚类（仅为与MissileCluster接口对齐）
+├── M2_Clustering/
+│   ├── main.py
+│   └── optimizer/
+│       ├── distributed_optimizer.py # DistributedOptimizer_M2
+│       └── allocator.py             # 复用 shared 目录下的时空聚类器
+├── M3_AmmoPenalty/
+│   ├── main.py
+│   └── optimizer/
+│       └── distributed_optimizer.py # 预留框架，待彻底重写为 OT (最优传输) 方案
+├── generate_all_scenarios.py  # 一键生成全部导弹池脚本
+├── requirements.txt           # 云端依赖：numpy, scipy, tqdm
+├── deploy_cloud.sh            # 云端一次性环境部署脚本
+├── run_M1.sh                  # 云端运行 M1 扫尾（mode3+mode4）
+├── run_M2.sh                  # 云端运行 M2 全量（4个mode）
+└── run_M3.sh                  # 暂时弃用，待 M3 重写完成后更新执行
+```
+
+### 2.2 核心调用链
+
+```mermaid
+flowchart TD
+    CLI["main.py --mode multi_eval"] --> PPE["ProcessPoolExecutor\nn_workers=10 个并行eval"]
+    PPE --> SingleRun["_evaluate_single_run_mx(args)\n子进程入口，n_threads=1"]
+    SingleRun --> Optimizer["TwoStageOptimizer / DistributedOptimizer_M2"]
+    
+    subgraph Phase1 [Phase 1 - 子任务独立优化]
+        Optimizer --> Allocator["NaiveAllocator (M1)\nSpatioTemporalAllocator (M2)"]
+        Allocator --> SubTaskGA["SubTaskGA × N_clusters\n各自10维GA，串行执行"]
+        SubTaskGA --> PhysEval["multi_missile_objective()\n调用物理引擎"]
+    end
+    
+    subgraph Phase2 [Phase 2 - 全局微调]
+        Optimizer --> Splice["基因拼接\n10维×5 → 50维超级个体"]
+        Splice --> GlobalGA["HybridGeneticAlgorithmV3\npop=30, gen=10 全局微调"]
+        GlobalGA --> PhysEval
+    end
+    
+    PhysEval --> PNG["PNGMissileFast\nRK4积分"]
+    PhysEval --> Smoke["SmokeStateCache\n高斯烟团+风漂移"]
+    PhysEval --> Block["is_smoke_blocking_vectorized\nBeer-Lambert透射率"]
+```
+
+### 2.3 基因编码说明
+
+| 方法 | 维度/UAV | 总维度(5架UAV) | 额外字段详细说明 |
+|---|---|---|---|
+| **M1/M2** | 10 | 50 | `[dir_x, dir_y, dir_z, speed, t1, d1, t2, d2, t3, d3]` (方向、速度、3次投放的时间与持续时长) |
+| **M3(待定)** | 13 | 65 | 在M1/M2基础上，每次投放增加一个离散开关基因 $s_i \in \{0, 1\}$，用于弹药控制惩罚 |
+
+> **注**：`single.py` 通过 `detect_gene_mode()` 自动识别 50 维还是 65 维，两套方法的底层仿真函数完全共用，保证了物理评估的绝对公平。
+
+### 2.4 关键物理参数（绝对冻结，严禁在后续开发中修改）
+
+| 参数名称 | 设定值 | 文件位置 |
+|---|---|---|
+| PNG 导航比 N | 4.0 | `shared/config/params.py` |
+| 导弹初始速度 | 300 m/s | `shared/config/params.py` |
+| 高斯烟团初始标准差 σ₀ | 25 m | `shared/config/params.py` |
+| 烟团扩散速率 | 8 m/s | `shared/config/params.py` |
+| 烟雾消光系数 α | 0.3 m⁻¹ | `shared/config/params.py` |
+| 拦截透射率阈值 | 0.10 | `shared/config/params.py` |
+| 物理遮挡安全距离阈值 | 15 m | `shared/config/params.py` |
+| 环境风场向量 | `[5.0, -3.0, 0.0]` m/s | `shared/config/params.py` |
+| CAP 巡逻内圈半径 | 3000 m | `shared/config/params.py` |
+| CAP 巡逻固定高度 | 800 m | `shared/config/params.py` |
+
+---
+
+## 三、四种攻击模式 (Attack Patterns)
+
+所有导弹到达时间 $ToA \sim N(45.0, (5/6)^2)$，3σ 覆盖区间为 `[42.5s, 47.5s]`，这完美模拟了饱和攻击中极其严苛的「同时弹着」特性。
+> **强制规定**：$ToA$ 必须维持正态分布模型，绝对不能修改为均匀分布，否则将破坏饱和攻击的数学定义。
+
+| 模式键名 | 中文名 | 扇区数 | 导弹总数 | 空间拓扑约束 |
+|---|---|---|---|---|
+| `mode_1_single_sector` | 单向窄扇区饱和打击 | 1 | 20 | 方位角`[30°,60°]`，距离`[12,18]`km |
+| `mode_2_orthogonal_pincer` | 正交钳形打击 | 2 | 10+10=20 | 北向`[80°,100°]` + 东向`[-10°,10°]` |
+| `mode_3_asymmetric_saturation`| 非对称多向饱和攻击 | 3 | 14+3+3=20 | 北向70%主攻 + 东南15%佯攻 + 西南15%佯攻 |
+| `mode_4_full_360_swarm` | 全向蜂群突防 | 1 | 20 | 360°均匀分布，奇偶高低交替来袭 |
+
+---
+
+## 四、当前实验进度（截至 2026-03-10，云端双线作战中）
+
+### 4.1 已完成阶段（本地计算完毕，结果已落盘）
+
+| 方法 | 模式 | 结果JSON文件路径 | 关键统计指标 |
+|---|---|---|---|
+| M1_NaiveGA | `mode_1_single_sector` | `.../M1_mode_1_single_sector_20260310_081605.json` | 拦截均值 4.7±7.85，效费比 0.313 |
+| M1_NaiveGA | `mode_2_orthogonal_pincer`| `.../M1_mode_2_orthogonal_pincer_20260310_153615.json` | 拦截均值 1.4±3.32，效费比 0.093 |
+
+> **提示**：两份文件均为 `n_evals=10`，`eval_idx=0..9` 完整无缺，新 AI 接手后切勿重复运行这两个场景。
+
+### 4.2 正在运行阶段（AutoDL 云端，32 vCPU / 60 GB RAM / Ubuntu）
+
+**机器编号**: `autodl-container-1d1947b82a-e61710f2`（西北B区 640机，Intel Xeon Platinum 8352V）
+**工作目录**: `/root/终极实验/终极实验/`
+**当前并行策略**: 开启两个后台终端，终端1跑M1剩余任务，终端2跑M2全量任务。各自占用 `n_workers=10`，总核数控制在20，系统稳定。
+
+| 终端编号 | 运行脚本 | 执行任务序列 | 实时监控命令 |
+|---|---|---|---|
+| 终端 1 | `run_M1.sh` | M1: `mode_3` → `mode_4`（依次串行） | `tail -f log_M1.log` |
+| 终端 2 | `run_M2.sh` | M2: `mode_1` → `mode_2` → `mode_3` → `mode_4` | `tail -f log_M2.log` |
+
+> 收集结果命令：`zip -r results_cloud.zip M1_NaiveGA/results M2_Clustering/results`
+
+### 4.3 GA 核心优化器参数（三套方法统一基准）
+
+| 参数名称 | 设定值 | 说明 |
+|---|---|---|
+| `pop_size` | 30 | GA 种群个体数 |
+| `max_gen` | 50 | 最大进化代数 |
+| `patience` | 30 代 | 早停机制容忍度 |
+| 早停触发条件 | `success==0 AND Δfitness<1e-4` | 连续 30 代无有效拦截且适应度停滞时触发 |
+| 精英保留比例 | 20% | 确保最优基因不丢失 |
+| 动态变异率 | `0.1 * (1 - gen/max_gen)` | 随代数线性衰减，兼顾前期探索与后期收敛 |
+
+---
+
+## 五、核心交接任务：M3 策略蓝图（⭐⭐⭐ 重中之重）
+
+新 AI 接手后的第一也是唯一的代码开发任务，就是彻底重写 M3 的分配逻辑。
+
+### 5.1 痛点诊断：M2 为什么会失败？
+
+M2 中的 `SpatioTemporalAllocator` 使用了硬编码的距离阈值（`SPATIAL_THRESHOLD=2000m`）进行聚类：
+* **Mode 1 下的侥幸**：20 枚导弹全部挤在单一方向，聚类为 1 个大簇，5 架 UAV 全军出击，表现尚可。
+* **Mode 3 / Mode 4 的崩盘**：全向分散攻击下，导弹间距极大，硬阈值导致系统生成了 15~20 个孤立的单导弹簇。而我们只有 5 架 UAV！传统匈牙利算法（1对1）只能覆盖 5 个簇，导致剩余的 10~15 枚导弹处于**“未被监控的火力真空区”**。算力被严重浪费，这就是我们要用 M3 解决的根本物理难题。
+
+### 5.2 M3 顶层设计：基于熵正则化最优传输 (OT) 的全局自适应分配
+
+**M3 核心思想**：彻底抛弃 K-means 等传统硬聚类。将 UAV 蜂群视为“防御资源场”，将导弹群视为“威胁需求场”。将战术分配降维为纯数学的**离散最优传输规划 (Discrete Optimal Transport)** 问题。
+
+**代价矩阵 (Cost Matrix) 数学建模**：
+对于 UAV $i$（位置 $p_i$，最大速度 $v_{max}$）和导弹 $j$（位置 $q_j$，预计到达时间 $TTI_j$），其拦截代价定义为：
+
+$$C_{i,j} = w_s \cdot \frac{\|p_i - q_j\|}{v_{max}} + w_t \cdot |TTI_j - TTI_{ref}| + w_e \cdot \frac{\|p_i - q_j\|^2}{\sigma^2}$$
+
+* $w_s$：空间响应代价（距离越远，代价越大）。
+* $w_t$：时间紧迫代价（TTI 越小，威胁越大，需优先处理）。
+* $w_e$：高斯斥力惩罚（防止系统将多架 UAV 派往极度邻近的同一区域）。
+
+### 5.3 M3 落地工程指南（Python 实战）
+
+面对 **5 架 UAV vs 20 枚导弹** 的极度不平衡问题，M3 必须实现“多对一”映射。由于 `scipy.optimize.linear_sum_assignment` 仅支持二分图匹配，我们需要使用**虚拟节点 (Virtual Nodes) 扩充法**。
+
+```python
+import numpy as np
+from scipy.optimize import linear_sum_assignment
+
+def build_ot_cost_matrix(uav_positions, missile_configs):
+    n_uav_real = len(uav_positions)      # 5 架真实的 UAV
+    n_missile = len(missile_configs)     # 20 枚来袭导弹
+    
+    # 技巧：节点克隆。允许每架 UAV 最多处理 K 枚导弹 (如 K=4)
+    # 将 5 架 UAV 克隆为 20 个“虚拟 UAV 席位”
+    K_capacity = int(np.ceil(n_missile / n_uav_real))
+    
+    # 构建扩展的代价矩阵 C (20 x 20)
+    C_extended = np.zeros((n_uav_real * K_capacity, n_missile))
+    
+    for real_i, uav_pos in enumerate(uav_positions):
+        for j, missile in enumerate(missile_configs):
+            # 提取空间与时间特征
+            spatial_dist = np.linalg.norm(uav_pos[:2] - np.array(missile["position"])[:2])
+            temporal_cost = abs(missile["arrival_time"] - 45.0) # 以45s为基准时刻
+            
+            # 计算联合代价
+            cost = W_S * spatial_dist + W_T * temporal_cost
+            
+            # 将代价赋给该 UAV 的所有虚拟席位
+            for k_clone in range(K_capacity):
+                virtual_i = real_i * K_capacity + k_clone
+                C_extended[virtual_i, j] = cost
+                
+    return C_extended, K_capacity
+
+def ot_assignment(uav_positions, missile_configs):
+    C_ext, K_cap = build_ot_cost_matrix(uav_positions, missile_configs)
+    
+    # 瞬间解出 20x20 的全局最优传输计划
+    row_ind, col_ind = linear_sum_assignment(C_ext)
+    
+    # 将虚拟席位还原映射回真实的 UAV ID
+    assignment_dict = {}
+    for r, c in zip(row_ind, col_ind):
+        real_uav_id = r // K_cap
+        if real_uav_id not in assignment_dict:
+            assignment_dict[real_uav_id] = []
+        assignment_dict[real_uav_id].append(c)
+        
+    # 返回：{ 0: [导弹2, 5, 8, 12], 1: [导弹1, 3], ... }
+    return assignment_dict
+```
+
+### 5.4 M3 接手后的开发路线图
+1.  **新建 OT 核心模块**：在 `shared/optimizer/` 下新建 `ot_allocator.py`，封装上述代码，接口必须与 `SpatioTemporalAllocator` 兼容。
+2.  **重构 M3 优化器**：修改 `M3_AmmoPenalty/optimizer/distributed_optimizer.py`，彻底替换旧版逻辑，引入 `OTAllocator`。
+3.  **脚本与验证**：更新 `run_M3.sh`，在云端跑通 M3，最后使用 Wilcoxon rank-sum 检验对比 M2 与 M3 在 Mode 3/4 下的数学显著性差异。
+
+---
+
+## 六、待填写的实验结果数据表
+
+### 6.1 拦截率对比（均值 ± 标准差 / 20 枚）
+
+| 攻击模式 | M1_NaiveGA | M2_Clustering | M3_OT (待填) |
+|---|---|---|---|
+| Mode-1 单向窄扇区 | 4.7 ± 7.85 | — | — |
+| Mode-2 正交钳形 | 1.4 ± 3.32 | — | — |
+| Mode-3 非对称多向 | ⏳ 运行中 | ⏳ 运行中 | — |
+| Mode-4 全向蜂群 | ⏳ 运行中 | ⏳ 运行中 | — |
+
+### 6.2 效费比对比（成功拦截数 / 消耗烟幕弹数）
+
+| 攻击模式 | M1_NaiveGA | M2_Clustering | M3_OT (待填) |
+|---|---|---|---|
+| Mode-1 单向窄扇区 | 0.313 | — | — |
+| Mode-2 正交钳形 | 0.093 | — | — |
+| Mode-3 非对称多向 | ⏳ | ⏳ | — |
+| Mode-4 全向蜂群 | ⏳ | ⏳ | — |
+
+---
+
+## 七、已知问题与工程风险排查表
+
+| 编号 | 风险描述 | 严重级别 | 当前状态 |
+|---|---|---|---|
+| W-001 | M1 在 `mode_4` 全向蜂群下，均匀分配导致先验极度撕裂，拦截率可能接近 0。 | 低（此乃证明 M1 愚蠢的预期实验结论） | 已知且保留 |
+| W-002 | M2 在多向场景下，固定距离阈值导致生成过多孤立簇，UAV 响应数量不足。 | **高（正是 M3 OT 算法要彻底解决的痛点）** | **等待重构** |
+| W-003 | Windows spawn 模式下 `ProcessPoolExecutor` 禁止嵌套，导致子进程强制串行。 | 低（已通过架构剥离解决） | 已处理闭环 |
+| W-004 | 云端 Linux 运行 `.sh` 脚本报 `\r` 错误（Windows CRLF 换行符问题）。 | 低（已通过 `sed -i 's/\r//' *.sh` 修复） | 已处理闭环 |
+
+---
+
+## 八、实验运行总日志
+
+| 日期 | 核心事件 | 推进状态 |
+|---|---|---|
+| 2026-03-09 | 物理架构升级：完成 4 种饱和攻击模式的数学建模与导弹池生成。 | ✅ 已完成 |
+| 2026-03-09 | 仿真引擎升级：M1/M2/M3 入口集成 `multi_eval` 进程池并行模式。 | ✅ 已完成 |
+| 2026-03-09 | 算法优化：GA 优化器全面植入 `patience=30` 联合早停机制。 | ✅ 已完成 |
+| 2026-03-10 | 基线确认：M1 (mode 1 & mode 2) 本地落盘，确立底层效费比基准。 | ✅ 已完成 |
+| 2026-03-10 | 算力转移：租用 32 核云端航母，并成功执行环境部署脚本。 | ✅ 已完成 |
+| 2026-03-10 | **战役打响：M1(扫尾) 与 M2(全量) 在云端开启双线并发轰炸**。 | ⏳ **监控中** |
+| 待定 | **代码重构：基于 OT 理论全面开发 M3 时空自适应分配器**。 | 📋 **首要任务** |
+| 待定 | 论文图表：填报实验数据矩阵，执行 Wilcoxon 统计显著性检验。 | 📋 待执行 |
+
+> **文档维护指令**：本文档为最高优先级状态记录。任何 AI 每次与用户进行关键代码重构或数据更新后，都必须提示用户是否需要同步更新本文档。

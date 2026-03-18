@@ -1,0 +1,97 @@
+{
+  "pattern": "mode_1_single_sector",
+  "method": "M2_Clustering",
+  "n_evals": 10,
+  "n_workers": 10,
+  "pop_size": 30,
+  "max_gen": 50,
+  "intercepted_mean": 18.6,
+  "intercepted_std": 3.8781438859330635,
+  "intercepted_max": 20,
+  "intercepted_min": 7,
+  "smokes_mean": 15.0,
+  "smokes_std": 0.0,
+  "efficiency_mean": 1.24,
+  "results": [
+    {
+      "eval_idx": 0,
+      "best_fitness": 200000.0,
+      "intercepted": 20,
+      "smokes_used": 15,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 1,
+      "best_fitness": 200000.0,
+      "intercepted": 20,
+      "smokes_used": 15,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 2,
+      "best_fitness": 200000.0,
+      "intercepted": 20,
+      "smokes_used": 15,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 3,
+      "best_fitness": 70052.88913276384,
+      "intercepted": 7,
+      "smokes_used": 15,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 4,
+      "best_fitness": 200000.0,
+      "intercepted": 20,
+      "smokes_used": 15,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 5,
+      "best_fitness": 190002.8523757271,
+      "intercepted": 19,
+      "smokes_used": 15,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 6,
+      "best_fitness": 200000.0,
+      "intercepted": 20,
+      "smokes_used": 15,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 7,
+      "best_fitness": 200000.0,
+      "intercepted": 20,
+      "smokes_used": 15,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 8,
+      "best_fitness": 200000.0,
+      "intercepted": 20,
+      "smokes_used": 15,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 9,
+      "best_fitness": 200000.0,
+      "intercepted": 20,
+      "smokes_used": 15,
+      "n_missiles": 20,
+      "n_clusters": 5
+    }
+  ]
+}

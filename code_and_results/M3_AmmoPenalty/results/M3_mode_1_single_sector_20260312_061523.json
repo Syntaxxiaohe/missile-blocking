@@ -1,0 +1,84 @@
+{
+  "pattern": "mode_1_single_sector",
+  "method": "M3_OT",
+  "n_evals": 10,
+  "n_workers": 10,
+  "pop_size": 30,
+  "max_gen": 50,
+  "intercepted_mean": 20.0,
+  "intercepted_std": 0.0,
+  "intercepted_max": 20,
+  "intercepted_min": 20,
+  "results": [
+    {
+      "eval_idx": 0,
+      "best_fitness": 200000.0,
+      "intercepted": 20,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 1,
+      "best_fitness": 200000.0,
+      "intercepted": 20,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 2,
+      "best_fitness": 200000.0,
+      "intercepted": 20,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 3,
+      "best_fitness": 200000.0,
+      "intercepted": 20,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 4,
+      "best_fitness": 200000.0,
+      "intercepted": 20,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 5,
+      "best_fitness": 200000.0,
+      "intercepted": 20,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 6,
+      "best_fitness": 200000.0,
+      "intercepted": 20,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 7,
+      "best_fitness": 200000.0,
+      "intercepted": 20,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 8,
+      "best_fitness": 200000.0,
+      "intercepted": 20,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 9,
+      "best_fitness": 200000.0,
+      "intercepted": 20,
+      "n_missiles": 20,
+      "n_clusters": 5
+    }
+  ]
+}

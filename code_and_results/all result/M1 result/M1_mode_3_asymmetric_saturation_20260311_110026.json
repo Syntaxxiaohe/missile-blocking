@@ -1,0 +1,87 @@
+{
+  "pattern": "mode_3_asymmetric_saturation",
+  "method": "M1_NaiveGA",
+  "n_evals": 10,
+  "n_workers": 10,
+  "pop_size": 30,
+  "max_gen": 50,
+  "intercepted_mean": 4.0,
+  "intercepted_std": 5.674504383644443,
+  "intercepted_max": 16,
+  "intercepted_min": 0,
+  "smokes_mean": 15.0,
+  "smokes_std": 0.0,
+  "efficiency_mean": 0.26666666666666666,
+  "results": [
+    {
+      "eval_idx": 0,
+      "best_fitness": 160010.62233389623,
+      "intercepted": 16,
+      "smokes_used": 15,
+      "n_missiles": 20
+    },
+    {
+      "eval_idx": 1,
+      "best_fitness": 39.982870129790854,
+      "intercepted": 0,
+      "smokes_used": 15,
+      "n_missiles": 20
+    },
+    {
+      "eval_idx": 2,
+      "best_fitness": 140011.77251112612,
+      "intercepted": 14,
+      "smokes_used": 15,
+      "n_missiles": 20
+    },
+    {
+      "eval_idx": 3,
+      "best_fitness": 55.65484316355241,
+      "intercepted": 0,
+      "smokes_used": 15,
+      "n_missiles": 20
+    },
+    {
+      "eval_idx": 4,
+      "best_fitness": 46.61252630425297,
+      "intercepted": 0,
+      "smokes_used": 15,
+      "n_missiles": 20
+    },
+    {
+      "eval_idx": 5,
+      "best_fitness": 64.53719512009896,
+      "intercepted": 0,
+      "smokes_used": 15,
+      "n_missiles": 20
+    },
+    {
+      "eval_idx": 6,
+      "best_fitness": 40038.328302666305,
+      "intercepted": 4,
+      "smokes_used": 15,
+      "n_missiles": 20
+    },
+    {
+      "eval_idx": 7,
+      "best_fitness": 10054.984812230136,
+      "intercepted": 1,
+      "smokes_used": 15,
+      "n_missiles": 20
+    },
+    {
+      "eval_idx": 8,
+      "best_fitness": 30042.810805688376,
+      "intercepted": 3,
+      "smokes_used": 15,
+      "n_missiles": 20
+    },
+    {
+      "eval_idx": 9,
+      "best_fitness": 20045.126065879576,
+      "intercepted": 2,
+      "smokes_used": 15,
+      "n_missiles": 20
+    }
+  ]
+}

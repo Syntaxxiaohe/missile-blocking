@@ -1,0 +1,84 @@
+{
+  "pattern": "mode_3_asymmetric_saturation",
+  "method": "M3_OT",
+  "n_evals": 10,
+  "n_workers": 10,
+  "pop_size": 30,
+  "max_gen": 50,
+  "intercepted_mean": 15.7,
+  "intercepted_std": 4.73392015141785,
+  "intercepted_max": 20,
+  "intercepted_min": 4,
+  "results": [
+    {
+      "eval_idx": 0,
+      "best_fitness": 200000.0,
+      "intercepted": 20,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 1,
+      "best_fitness": 130016.07929452039,
+      "intercepted": 13,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 2,
+      "best_fitness": 200000.0,
+      "intercepted": 20,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 3,
+      "best_fitness": 180005.9856804619,
+      "intercepted": 18,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 4,
+      "best_fitness": 150013.63948770854,
+      "intercepted": 15,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 5,
+      "best_fitness": 130024.45881411336,
+      "intercepted": 13,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 6,
+      "best_fitness": 150017.58108199402,
+      "intercepted": 15,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 7,
+      "best_fitness": 190001.76731657353,
+      "intercepted": 19,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 8,
+      "best_fitness": 200000.0,
+      "intercepted": 20,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 9,
+      "best_fitness": 40037.73105834714,
+      "intercepted": 4,
+      "n_missiles": 20,
+      "n_clusters": 5
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Editors
+.vscode/
+.cursor/
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Logs and caches
+*.log
+.cache/
+
+# LaTeX build artifacts
+*.aux
+*.out
+*.fls
+*.fdb_latexmk
+*.xdv
+*.blg
+*.bbl
+*.synctex.gz

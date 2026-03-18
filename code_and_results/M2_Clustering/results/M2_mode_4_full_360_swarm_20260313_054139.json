@@ -1,0 +1,97 @@
+{
+  "pattern": "mode_4_full_360_swarm",
+  "method": "M2_Clustering",
+  "n_evals": 10,
+  "n_workers": 10,
+  "pop_size": 30,
+  "max_gen": 50,
+  "intercepted_mean": 5.7,
+  "intercepted_std": 5.604462507680822,
+  "intercepted_max": 20,
+  "intercepted_min": 0,
+  "smokes_mean": 15.0,
+  "smokes_std": 0.0,
+  "efficiency_mean": 0.38,
+  "results": [
+    {
+      "eval_idx": 0,
+      "best_fitness": 10058.298352482281,
+      "intercepted": 1,
+      "smokes_used": 15,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 1,
+      "best_fitness": 30045.57449718363,
+      "intercepted": 3,
+      "smokes_used": 15,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 2,
+      "best_fitness": 70032.01282236588,
+      "intercepted": 7,
+      "smokes_used": 15,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 3,
+      "best_fitness": 63.66900598905243,
+      "intercepted": 0,
+      "smokes_used": 15,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 4,
+      "best_fitness": 80029.85753575571,
+      "intercepted": 8,
+      "smokes_used": 15,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 5,
+      "best_fitness": 90027.44354793361,
+      "intercepted": 9,
+      "smokes_used": 15,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 6,
+      "best_fitness": 10066.961731641595,
+      "intercepted": 1,
+      "smokes_used": 15,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 7,
+      "best_fitness": 200000.0,
+      "intercepted": 20,
+      "smokes_used": 15,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 8,
+      "best_fitness": 50040.25977002188,
+      "intercepted": 5,
+      "smokes_used": 15,
+      "n_missiles": 20,
+      "n_clusters": 5
+    },
+    {
+      "eval_idx": 9,
+      "best_fitness": 30057.11157813061,
+      "intercepted": 3,
+      "smokes_used": 15,
+      "n_missiles": 20,
+      "n_clusters": 5
+    }
+  ]
+}

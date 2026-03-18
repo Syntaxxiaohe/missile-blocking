@@ -1,0 +1,217 @@
+\documentclass[a4paper,10pt]{ctexart}
+\usepackage[margin=1.0cm]{geometry}
+\usepackage{tikz}
+\usepackage{xcolor}
+% 引入 shadows 宏包开启高级光影渲染！
+\usetikzlibrary{positioning, fit, backgrounds, arrows.meta, calc, shadows}
+
+% ================= T0 级顶刊专属色板 (Deep Muted Palette) =================
+\definecolor{AcadNavy}{RGB}{28, 84, 133}      % 深海藏青 (L1)
+\definecolor{AcadOchre}{RGB}{217, 95, 2}      % 赭石橙 (L2)
+\definecolor{AcadPlum}{RGB}{117, 112, 179}    % 灰梅紫 (L3)
+\definecolor{AcadCrimson}{RGB}{200, 30, 40}   % 绛红 (M3核心)
+\definecolor{AcadTeal}{RGB}{27, 158, 119}     % 冷霜青 (L4)
+\definecolor{AcadForest}{RGB}{56, 142, 60}    % 幽林绿 (L5)
+\definecolor{LayerBg}{RGB}{249, 250, 251}     % 极微弱的高级灰底
+\definecolor{LineGray}{RGB}{140, 140, 140}    % 柔和的次级连线灰
+
+\begin{document}
+	
+	\begin{figure}[htbp]
+		\centering
+		\resizebox{1.0\textwidth}{!}{
+			\begin{tikzpicture}[
+				% 启用数学界最顶级的 Latex 锐利箭头
+				>={Latex[length=3.5mm, width=2.2mm]},
+				line join=round,
+				line cap=round,
+				% --- 统一框体样式 (加入微投影 shadow 与 渐变质感 gradient) ---
+				basebox/.style={
+					draw, rounded corners=3pt, thick, align=center, inner sep=8pt, 
+					font=\sffamily, minimum height=2.2cm,
+					top color=white, bottom color=black!2, % 高级微弱渐变
+					drop shadow={opacity=0.12, shadow xshift=1.8pt, shadow yshift=-1.8pt} % 悬浮投影
+				},
+				% 绝对宽度锁死，使用顶级色系
+				l1box/.style={basebox, draw=AcadNavy, text width=6.8cm},
+				l2box/.style={basebox, draw=AcadOchre, text width=4.8cm},
+				l3box/.style={basebox, draw=AcadPlum, text width=4.8cm},
+				% 核心创新 M3：双线边框 (double)，微红底色，投影加深
+				corebox/.style={
+					basebox, draw=AcadCrimson, double=white, double distance=0.8pt, line width=1.0pt, 
+					top color=white, bottom color=red!4, text width=4.8cm,
+					drop shadow={opacity=0.18, shadow xshift=2.0pt, shadow yshift=-2.0pt}
+				},
+				l4box/.style={basebox, draw=AcadTeal, text width=6.8cm},
+				l5box/.style={basebox, draw=AcadForest, text width=4.8cm},
+				% 层级虚线基板样式 (细致虚线，圆滑转角，极淡灰底)
+				layerbox/.style={
+					draw=black!20, fill=LayerBg, dashed, dash pattern=on 5pt off 4pt, 
+					rounded corners=8pt, line width=1pt, inner sep=18pt
+				},
+				% 层级标题样式
+				layerlabel/.style={
+					font=\sffamily\Large\bfseries, text=black!75, anchor=south west
+				},
+				% 连线文字遮罩
+				linetext/.style={
+					fill=white, text=#1, draw=none, inner sep=6pt, font=\bfseries\small, align=center
+				},
+				% 核心回路循环箭头样式 (线条紧实，配色深邃)
+				looparrow/.style={
+					->, line width=1.6pt, dashed, dash pattern=on 6pt off 4pt, rounded corners=8pt
+				},
+				% 中央顺承递进箭头样式 (极简高级灰)
+				mainarrow/.style={
+					->, line width=1.6pt, draw=LineGray
+				}
+				]
+				
+				% =======================================================
+				% 绝对 Y 坐标轴 (黄金间距 5.2cm)
+				% =======================================================
+				\def\YA{0}       
+				\def\YB{-5.2}    
+				\def\YC{-10.4}   
+				\def\YD{-15.6}   
+				\def\YE{-20.8}   
+				
+				% =======================================================
+				% L1: 交战场景构建与态势初始化
+				% =======================================================
+				\node[l1box] (A1) at (-4.2, \YA) {
+					\textbf{全局态势与基础要素}\\[2mm]
+					目标属性 / UAV编队阵位\\
+					三维风场环境 / 威胁导弹池
+				};
+				\node[l1box] (A2) at (4.2, \YA) {
+					\textbf{四类极限攻击场景拓扑}\\[2mm]
+					S1: 窄扇区饱和 \quad S2: 正交钳形\\
+					S3: 非对称多向 \quad S4: 全向蜂群
+				};
+				
+				\begin{scope}[on background layer]
+					\node[layerbox, fit=(A1)(A2)] (Layer1) {};
+					\node[layerlabel] at ([shift={(10pt,8pt)}]Layer1.north west) {L1: 交战场景构建与态势初始化};
+				\end{scope}
+				
+				% =======================================================
+				% L2: 统一物理仿真评估内核
+				% =======================================================
+				\node[l2box] (B1) at (-6.2, \YB) {
+					\textbf{高保真导弹动力学}\\[2mm]
+					3D-PNG 比例导引追踪\\
+					惯性盲飞 / 气动阻力衰减\\
+					重捕获末端视场角约束
+				};
+				\node[l2box] (B2) at (0, \YB) {
+					\textbf{动态烟雾演化模块}\\[2mm]
+					风场平流驱动与重力沉降\\
+					尺度扩散展宽效应\\
+					时变高斯浓度场分布
+				};
+				\node[l2box] (B3) at (6.2, \YB) {
+					\textbf{烟雾遮蔽判定模块}\\[2mm]
+					六特征视线空间采样\\
+					Beer-Lambert 解析透射\\
+					有效烟团筛选与空间剪枝
+				};
+				
+				\begin{scope}[on background layer]
+					\node[layerbox, fit=(B1)(B2)(B3)] (Layer2) {};
+					\node[layerlabel] at ([shift={(10pt,8pt)}]Layer2.north west) {L2: 统一物理仿真评估内核};
+				\end{scope}
+				
+				% =======================================================
+				% L3: 无人机协调调度与分配策略
+				% =======================================================
+				\node[l3box] (C1) at (-6.2, \YC) {
+					\textbf{M1: 均匀分配基线}\\[2mm]
+					(顺序分配，无时空一致性)
+				};
+				\node[l3box] (C2) at (0, \YC) {
+					\textbf{M2: 时空聚类机制}\\[2mm]
+					(局部贪心，缺乏天然簇，\\极易引发盲区遗漏)
+				};
+				\node[corebox] (C3) at (6.2, \YC) {
+					\textbf{M3: 离散最优传输 (OT)}\\[2mm]
+					(\textbf{引入虚拟席位构造方阵，}\\ \textbf{数学证明零盲区全覆盖})
+				};
+				
+				\begin{scope}[on background layer]
+					\node[layerbox, fit=(C1)(C2)(C3)] (Layer3) {};
+					\node[layerlabel] at ([shift={(10pt,8pt)}]Layer3.north west) {L3: 无人机协调调度与分配策略};
+				\end{scope}
+				
+				% =======================================================
+				% L4: 两阶段混合 GA 求解
+				% =======================================================
+				\node[l4box] (D1) at (-4.2, \YD) {
+					\textbf{两阶段混合遗传算法 (Hybrid GA)}\\[2mm]
+					Phase 1: 降维快搜 $\rightarrow$ Phase 2: 全局微调\\
+					\textit{(统一 50 维编码: 航迹向量 / 速度 / 布烟时序)}
+				};
+				\node[l4box] (D2) at (4.2, \YD) {
+					\textbf{统一适应度评估机制 (Fitness)}\\[2mm]
+					主目标: 最大化拦截成功阻断数\\
+					次目标: 失败导弹的脱靶距离惩罚
+				};
+				
+				\begin{scope}[on background layer]
+					\node[layerbox, fit=(D1)(D2)] (Layer4) {};
+					\node[layerlabel] at ([shift={(10pt,8pt)}]Layer4.north west) {L4: 两阶段混合 GA 求解};
+				\end{scope}
+				
+				% =======================================================
+				% L5: 综合效能评估与统计反馈
+				% =======================================================
+				\node[l5box] (E1) at (-6.2, \YE) {
+					\textbf{拦截阻断成功率}\\
+					(核心防御效能)
+				};
+				\node[l5box] (E2) at (0, \YE) {
+					\textbf{综合效费比}\\
+					(资源利用率评估)
+				};
+				\node[l5box] (E3) at (6.2, \YE) {
+					\textbf{敏感性与稳健性}\\
+					(物理参数 / 算法结构)
+				};
+				
+				\begin{scope}[on background layer]
+					\node[layerbox, fit=(E1)(E2)(E3)] (Layer5) {};
+					\node[layerlabel] at ([shift={(10pt,8pt)}]Layer5.north west) {L5: 综合效能评估与统计反馈};
+				\end{scope}
+				
+				% =======================================================
+				% 中央递进瀑布流箭头 (绝对坐标硬对齐)
+				% =======================================================
+				\draw[mainarrow] (0, \YA - 1.45) -- (0, \YB + 1.85);
+				\draw[mainarrow] (0, \YB - 1.45) -- (0, \YC + 1.85);
+				\draw[mainarrow] (0, \YC - 1.45) -- (0, \YD + 1.85);
+				\draw[mainarrow] (0, \YD - 1.45) -- (0, \YE + 1.85);
+				
+				% =======================================================
+				% 左右对称的物理试算大闭环
+				% =======================================================
+				\def\BusLeft{-10.4}   
+				\def\BusRight{10.4}   
+				
+				% 1. 左侧冷霜青线：L4 -> L2 (驱动试算 - 逆流向上)
+				\draw[looparrow, draw=AcadTeal]
+				(Layer4.west) -- (\BusLeft, 0 |- Layer4.west) -- 
+				node[linetext=AcadTeal, rotate=90] {动作参数映射与驱动试算} 
+				(\BusLeft, 0 |- Layer2.west) -- (Layer2.west);
+				
+				% 2. 右侧赭石橙线：L2 -> L4 (Fitness评估反馈 - 顺流向下)
+				\draw[looparrow, draw=AcadOchre]
+				(Layer2.east) -- (\BusRight, 0 |- Layer2.east) -- 
+				node[linetext=AcadOchre, rotate=-90] {反馈脱靶量演化结果评估} 
+				(\BusRight, 0 |- Layer4.east) -- (Layer4.east);
+				
+			\end{tikzpicture}
+		}
+		\caption{无人机群协同烟幕防御系统总体仿真与优化框架图。系统采用严密的五层瀑布流架构与双向物理闭环设计。两阶段混合遗传算法（L4）居中协调调度策略（L3），并通过向底层物理仿真引擎（L2）下发动作参数与接收脱靶量反馈，构建出高度对称的适应度寻优回路（图中两侧虚线部分）。}
+	\end{figure}
+	
+\end{document}
